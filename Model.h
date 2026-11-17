@@ -85,7 +85,7 @@ struct Model {
         return loss + L2 * regularisation / x.size() / 2;
     }
 
-    Derivatives computeDerivatives(const vector<double> &x, const vector<double> &y) {
+    void computeDerivatives(const vector<double> &x, const vector<double> &y, Derivatives &accumulator) {
         struct Cache {
             vector<double> z, a;
         };
@@ -98,25 +98,25 @@ struct Model {
             activations = cache[i].a;
         }
         vector<double> dJ_da = lossFunction->gradient(y, activations);
-        Derivatives ret;
-        auto &[dJ_dw, dJ_db] = ret;
-        dJ_dw.resize(K);
-        dJ_db.resize(K);
+        auto &[dJ_dw, dJ_db] = accumulator;
         for (int i = K; i--;) {
-            int n = layers[i]->n;
+            int n = layers[i]->n, m = layers[i]->w[0].size();
             vector<double> dJ_dz = layers[i]->derivative(dJ_da, cache[i].z, cache[i].a);
             const vector<double> &a = i ? cache[i - 1].a : x;
-            dJ_dw[i].resize(n);
             for (int j = 0; j < n; ++j) {
-                dJ_dw[i][j] = a * dJ_dz[j];
+                auto &rowW = dJ_dw[i][j];
+                double dJ_dz_j = dJ_dz[j];
+#pragma omp simd
+                for (int k = 0; k < m; ++k) {
+                    rowW[k] += a[k] * dJ_dz_j;
+                }
             }
-            dJ_db[i] = dJ_dz;
+            dJ_db[i] += dJ_dz;
         }
-        return ret;
     }
 
-    Derivatives computeDerivatives(const vector<vector<double>> &x, const vector<vector<double>> &y, double regularisation) {
-        int m = x.size(), K = layers.size();
+    Derivatives computeDerivatives(int m, const vector<vector<double>> &x, const vector<vector<double>> &y, double regularisation, const vector<bool> &doSample) {
+        int M = x.size(), K = layers.size();
         Derivatives ret;
         ret.dJ_dw.resize(K);
         ret.dJ_db.resize(K);
@@ -135,10 +135,10 @@ struct Model {
         {
             Derivatives local = empty;
 #pragma omp for nowait
-            for (int i = 0; i < m; ++i) {
-                auto [dJ_dw, dJ_db] = computeDerivatives(x[i], y[i]);
-                local.dJ_dw += dJ_dw;
-                local.dJ_db += dJ_db;
+            for (int i = 0; i < M; ++i) {
+                if (doSample[i]) {
+                    computeDerivatives(x[i], y[i], local);
+                }
             }
 #pragma omp critical
             ret.dJ_dw += local.dJ_dw;
@@ -149,22 +149,20 @@ struct Model {
         return ret;
     }
 
-    void fit(const vector<vector<double>> &x, const vector<vector<double>> &y, int epochs, Optimiser &optimiser, double regularisation, __gnu_cxx::sfmt19937 &rng, int k = -1) {
-        if (k == -1) {
-            k = x.size();
-        }
+    void fit(const vector<vector<double>> &x, const vector<vector<double>> &y, int epochs, Optimiser &optimiser, double regularisation, MyRandom &rng, double sample = 1) {
+        int M = x.size();
         for (int t = epochs; t--;) {
             cerr << t << endl;
-            vector<vector<double>> xSubset(k), ySubset(k);
-            vector<int> order(x.size());
-            iota(order.begin(), order.end(), 0);
-            shuffle(order.begin(), order.end(), rng);
-            for (int i = 0; i < k; ++i) {
-                xSubset[i] = x[order[i]];
-                ySubset[i] = y[order[i]];
+            vector<bool> doSample(M);
+            int m = 0;
+            for (int i = 0; i < M; ++i) {
+                if (rng(0, 1) <= sample) {
+                    doSample[i] = true;
+                    ++m;
+                }
             }
-            optimiser.optimise(computeDerivatives(xSubset, ySubset, regularisation), layers);
-            if (t % 100 == 0) {
+            optimiser.optimise(computeDerivatives(m, x, y, regularisation, doSample), layers);
+            if (t % 500 == 0) {
                 cerr << loss(x, y) << endl;
             }
         }

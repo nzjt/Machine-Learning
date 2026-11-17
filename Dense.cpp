@@ -45,9 +45,13 @@ void Dense::resize(int m) {
 [[nodiscard]] vector<double> Dense::computeZ(const vector<double> &activations) const {
     vector<double> z = b;
     for (int i = 0; i < n; ++i) {
+        double s = 0;
+        auto wi = w[i].data();
+#pragma omp simd reduction(+:s)
         for (int j = 0; j < m; ++j) {
-            z[i] += w[i][j] * activations[j];
+            s += wi[j] * activations[j];
         }
+        z[i] += s;
     }
     return z;
 }
@@ -59,9 +63,12 @@ void Dense::resize(int m) {
 [[nodiscard]] vector<double> Dense::derivative(vector<double> &dJ_da, const vector<double> &z, const vector<double> &a) const {
     vector<double> dJ_dz = activationFunction->gradient(dJ_da, z, a);
     dJ_da.assign(m, 0);
-    for (int j = 0; j < m; ++j) {
-        for (int k = 0; k < n; ++k) {
-            dJ_da[j] += dJ_dz[k] * w[k][j];
+    for (int k = 0; k < n; ++k) {
+        double dJ_dz_k = dJ_dz[k];
+        auto wk = w[k].data();
+#pragma omp simd
+        for (int j = 0; j < m; ++j) {
+            dJ_da[j] += dJ_dz_k * wk[j];
         }
     }
     return dJ_dz;

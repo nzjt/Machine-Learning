@@ -23,3 +23,13 @@ std::ostream &operator<<(std::ostream &o, const std::vector<std::vector<double>>
     }
     return o;
 }
+
+double dot(const std::vector<double> &a, const std::vector<double> &b) {
+    int n = a.size();
+    double s = 0;
+#pragma omp simd reduction(+:s)
+    for (int i = 0; i < n; ++i) {
+        s += a[i] * b[i];
+    }
+    return s;
+}

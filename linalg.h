@@ -96,6 +96,8 @@ std::vector<T> operator-(std::vector<T> a) {
     return a;
 }
 
+double dot(const std::vector<double> &a, const std::vector<double> &b);
+
 template <class T>
 T dot(const std::vector<T> &a, const std::vector<T> &b) {
     T ret = a[0] * b[0];
