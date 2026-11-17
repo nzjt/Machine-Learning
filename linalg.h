@@ -14,9 +14,8 @@ std::vector<T> operator*=(std::vector<T> &a, const std::vector<T> &b) {
 }
 
 template <class T>
-std::vector<T> operator*(const std::vector<T> &a, const std::vector<T> &b) {
-    auto ret = a;
-    return ret *= b;
+std::vector<T> operator*(std::vector<T> a, const std::vector<T> &b) {
+    return a *= b;
 }
 
 template <class T, class U>
@@ -26,9 +25,8 @@ std::vector<T> operator*=(std::vector<T> &a, const U &b) {
 }
 
 template <class T, class U>
-std::vector<T> operator*(const std::vector<T> &a, const U &b) {
-    auto ret = a;
-    return ret *= b;
+std::vector<T> operator*(std::vector<T> a, const U &b) {
+    return a *= b;
 }
 
 template <class T>
@@ -38,9 +36,8 @@ std::vector<T> &operator+=(std::vector<T> &a, const std::vector<T> &b) {
 }
 
 template <class T>
-std::vector<T> operator+(const std::vector<T> &a, const std::vector<T> &b) {
-    auto ret = a;
-    return ret += b;
+std::vector<T> operator+(std::vector<T> a, const std::vector<T> &b) {
+    return a += b;
 }
 
 template <class T>
@@ -50,9 +47,8 @@ std::vector<T> &operator+=(std::vector<T> &a, const T &b) {
 }
 
 template <class T>
-std::vector<T> operator+(const std::vector<T> &a, const T &b) {
-    auto ret = a;
-    return ret += b;
+std::vector<T> operator+(std::vector<T> a, const T &b) {
+    return a += b;
 }
 
 template <class T>
@@ -62,9 +58,8 @@ std::vector<T> &operator-=(std::vector<T> &a, const std::vector<T> &b) {
 }
 
 template <class T>
-std::vector<T> operator-(const std::vector<T> &a, const std::vector<T> &b) {
-    auto ret = a;
-    return ret -= b;
+std::vector<T> operator-(std::vector<T> a, const std::vector<T> &b) {
+    return a -= b;
 }
 
 template <class T>
@@ -74,9 +69,14 @@ std::vector<T> &operator-=(std::vector<T> &a, const T &b) {
 }
 
 template <class T>
-std::vector<T> operator-(const std::vector<T> &a, const T &b) {
-    auto ret = a;
-    return ret -= b;
+std::vector<T> operator-(std::vector<T> a, const T &b) {
+    return a -= b;
+}
+
+template <class T>
+std::vector<T> operator-(const T &a, std::vector<T> b) {
+    for (auto &bi: b) bi = a - bi;
+    return b;
 }
 
 template <class T, class U>
@@ -86,16 +86,14 @@ std::vector<T> operator/=(std::vector<T> &a, const U &b) {
 }
 
 template <class T, class U>
-std::vector<T> operator/(const std::vector<T> &a, const U &b) {
-    auto ret = a;
-    return ret /= b;
+std::vector<T> operator/(std::vector<T> a, const U &b) {
+    return a /= b;
 }
 
 template <class T>
-std::vector<T> operator-(const std::vector<T> &a) {
-    auto ret = a;
-    for (auto &ai: ret) ai = -ai;
-    return ret;
+std::vector<T> operator-(std::vector<T> a) {
+    for (auto &ai: a) ai = -ai;
+    return a;
 }
 
 template <class T>

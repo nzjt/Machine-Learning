@@ -116,16 +116,33 @@ struct Model {
     }
 
     Derivatives computeDerivatives(const vector<vector<double>> &x, const vector<vector<double>> &y, double regularisation) {
-        int m = x.size();
-        Derivatives ret = computeDerivatives(x[0], y[0]);
-        for (int i = 0; ++i < m;) {
-            auto [dJ_dw, dJ_db] = computeDerivatives(x[i], y[i]);
-            ret.dJ_dw += dJ_dw;
-            ret.dJ_db += dJ_db;
+        int m = x.size(), K = layers.size();
+        Derivatives ret;
+        ret.dJ_dw.resize(K);
+        ret.dJ_db.resize(K);
+        for (int i = 0; i < K; ++i) {
+            ret.dJ_dw[i] = layers[i]->w * regularisation;
+            ret.dJ_db[i] = layers[i]->b * regularisation;
         }
-        for (int i = 0; i < layers.size(); ++i) {
-            ret.dJ_dw[i] += layers[i]->w * regularisation;
-            ret.dJ_db[i] += layers[i]->b * regularisation;
+        Derivatives empty;
+        empty.dJ_dw.resize(K);
+        empty.dJ_db.resize(K);
+        for (int i = 0; i < K; ++i) {
+            empty.dJ_dw[i] = vector<vector<double>>(layers[i]->w.size(), vector<double>(layers[i]->w[0].size()));
+            empty.dJ_db[i] = vector<double>(layers[i]->b.size());
+        }
+#pragma omp parallel
+        {
+            Derivatives local = empty;
+#pragma omp for nowait
+            for (int i = 0; i < m; ++i) {
+                auto [dJ_dw, dJ_db] = computeDerivatives(x[i], y[i]);
+                local.dJ_dw += dJ_dw;
+                local.dJ_db += dJ_db;
+            }
+#pragma omp critical
+            ret.dJ_dw += local.dJ_dw;
+            ret.dJ_db += local.dJ_db;
         }
         ret.dJ_dw /= m;
         ret.dJ_db /= m;
