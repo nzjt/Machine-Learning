@@ -1,0 +1,7 @@
+archive
+*.nnw
+*.csv
+*.out
+.idea
+*.out.*
+main.cpp
