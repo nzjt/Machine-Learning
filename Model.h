@@ -115,7 +115,7 @@ struct Model {
         }
     }
 
-    Derivatives computeDerivatives(int m, const vector<vector<double>> &x, const vector<vector<double>> &y, double regularisation, const vector<bool> &doSample) {
+    Derivatives computeDerivatives(int m, const vector<vector<double>> &x, const vector<vector<double>> &y, const vector<bool> &doSample) {
         int M = x.size(), K = layers.size();
         Derivatives ret;
         ret.dJ_dw.resize(K);
@@ -149,7 +149,7 @@ struct Model {
         return ret;
     }
 
-    void fit(const vector<vector<double>> &x, const vector<vector<double>> &y, int epochs, Optimiser &optimiser, double regularisation, MyRandom &rng, double sample = 1) {
+    void fit(const vector<vector<double>> &x, const vector<vector<double>> &y, int epochs, Optimiser &optimiser, MyRandom &rng, double sample = 1) {
         int M = x.size();
         for (int t = epochs; t--;) {
             cerr << t << endl;
@@ -161,7 +161,7 @@ struct Model {
                     ++m;
                 }
             }
-            optimiser.optimise(computeDerivatives(m, x, y, regularisation, doSample), layers);
+            optimiser.optimise(computeDerivatives(m, x, y, doSample), layers);
             if (t % 500 == 0) {
                 cerr << loss(x, y) << endl;
             }
