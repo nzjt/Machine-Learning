@@ -4,11 +4,11 @@
 
 struct Nesterov : Optimiser {
     double learningRate, mu;
-    Derivatives v;
+    Model::Parameters v;
 
-    Nesterov(double learningRate, double mu);
+    Nesterov(double learningRate, double mu = 0.9);
 
-    void step(Model &model, const std::function<Derivatives(const Model&)> &computeDerivatives) override;
+    void step(Model &model, const std::function<Model::Parameters(const Model&)> &computeDerivatives) override;
 };
 
 #endif //MACHINE_LEARNING_NESTEROV_H

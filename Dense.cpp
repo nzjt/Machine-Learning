@@ -35,6 +35,10 @@ void Dense::resize(int m) {
     w.assign(n, vector<double>(m));
 }
 
+int Dense::nParameters() const {
+    return n * (m + 1);
+}
+
 [[nodiscard]] vector<double> Dense::computeZ(const vector<double> &activations) const {
     vector<double> z = b;
     for (int i = 0; i < n; ++i) {

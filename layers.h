@@ -13,6 +13,8 @@ struct Layer {
 
     virtual void resize(int) {}
 
+    [[nodiscard]] virtual int nParameters() const = 0;
+
     [[nodiscard]] virtual vector<double> predict(const vector<double> &activation) const = 0;
 
     template <class T>

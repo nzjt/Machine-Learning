@@ -46,6 +46,14 @@ void Model::write(ofstream &file) const {
     return activations;
 }
 
+int Model::nParameters() const {
+    int total = 0;
+    for (const auto &layer : layers) {
+        total += layer->nParameters();
+    }
+    return total;
+}
+
 void Model::computeDerivatives(const vector<double> &x, const vector<double> &y, Derivatives &accumulator) const {
     struct Cache {
         vector<double> z, a;
@@ -76,14 +84,14 @@ void Model::computeDerivatives(const vector<double> &x, const vector<double> &y,
     }
 }
 
-Derivatives Model::computeDerivatives(int m, const vector<vector<double>> &x, const vector<vector<double>> &y, const vector<bool> &doSample) const {
+Model::Parameters Model::computeDerivatives(int m, const vector<vector<double>> &x, const vector<vector<double>> &y, const vector<bool> &doSample) const {
     int M = x.size(), K = layers.size();
-    Derivatives ret;
-    ret.dJ_dw.resize(K);
-    ret.dJ_db.resize(K);
+    Derivatives gradient;
+    gradient.dJ_dw.resize(K);
+    gradient.dJ_db.resize(K);
     for (int i = 0; i < K; ++i) {
-        ret.dJ_dw[i] = layers[i]->w * regularisation;
-        ret.dJ_db[i] = layers[i]->b * regularisation;
+        gradient.dJ_dw[i] = layers[i]->w * regularisation;
+        gradient.dJ_db[i] = layers[i]->b * regularisation;
     }
     Derivatives empty;
     empty.dJ_dw.resize(K);
@@ -102,10 +110,33 @@ Derivatives Model::computeDerivatives(int m, const vector<vector<double>> &x, co
             }
         }
 #pragma omp critical
-        ret.dJ_dw += local.dJ_dw;
-        ret.dJ_db += local.dJ_db;
+        gradient.dJ_dw += local.dJ_dw;
+        gradient.dJ_db += local.dJ_db;
     }
-    ret.dJ_dw /= m;
-    ret.dJ_db /= m;
-    return ret;
+    Parameters ret(nParameters());
+    auto ptr = ret.data();
+    for (int i = 0; i < K; ++i) {
+        for (const auto &row : gradient.dJ_dw[i]) {
+            memcpy(ptr, row.data(), row.size() * sizeof(double));
+            ptr += row.size();
+        }
+        auto &dJ_db = gradient.dJ_db[i];
+        memcpy(ptr, dJ_db.data(), dJ_db.size() * sizeof(double));
+        ptr += dJ_db.size();
+    }
+    return ret / m;
+}
+
+void Model::operator+=(const Parameters &parameters) {
+    auto ptr = parameters.data();
+    for (auto &layer : layers) {
+        for (auto &row : layer->w) {
+            for (auto &wi: row) {
+                wi += *ptr++;
+            }
+        }
+        for (auto &bi: layer->b) {
+            bi += *ptr++;
+        }
+    }
 }

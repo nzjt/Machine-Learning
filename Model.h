@@ -6,32 +6,14 @@
 
 using namespace std;
 
-struct Derivatives {
-    vector<vector<vector<double>>> dJ_dw;
-    vector<vector<double>> dJ_db;
-
-    Derivatives operator+=(const Derivatives &other) {
-        dJ_dw += other.dJ_dw;
-        dJ_db += other.dJ_db;
-        return *this;
-    }
-
-    Derivatives operator+(const Derivatives &other) const {
-        return {dJ_dw + other.dJ_dw, other.dJ_db};
-    }
-
-    Derivatives operator*=(double x) {
-        dJ_dw *= x;
-        dJ_db *= x;
-        return *this;
-    }
-
-    Derivatives operator*(double x) const {
-        return {dJ_dw * x, dJ_db * x};
-    }
-};
-
 struct Model {
+    struct Derivatives {
+        vector<vector<vector<double>>> dJ_dw;
+        vector<vector<double>> dJ_db;
+    };
+
+    using Parameters = vector<double>;
+
     vector<Dense*> layers;
     LossFunction *lossFunction = nullptr;
     double regularisation = 0;
@@ -72,9 +54,13 @@ struct Model {
         return loss + L2 * regularisation / x.size() / 2;
     }
 
+    [[nodiscard]] int nParameters() const;
+
     void computeDerivatives(const vector<double> &x, const vector<double> &y, Derivatives &accumulator) const;
 
-    Derivatives computeDerivatives(int m, const vector<vector<double>> &x, const vector<vector<double>> &y, const vector<bool> &doSample) const;
+    Parameters computeDerivatives(int m, const vector<vector<double>> &x, const vector<vector<double>> &y, const vector<bool> &doSample) const;
+
+    void operator+=(const Parameters &parameters);
 };
 
 #endif //MACHINE_LEARNING_MODEL_H

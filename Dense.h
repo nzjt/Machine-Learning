@@ -20,6 +20,8 @@ struct Dense : Layer {
 
     void resize(int m) override;
 
+    [[nodiscard]] int nParameters() const override;
+
     [[nodiscard]] std::vector<double> computeZ(const std::vector<double> &activations) const;
 
     [[nodiscard]] std::vector<double> predict(const std::vector<double> &activations) const override;
