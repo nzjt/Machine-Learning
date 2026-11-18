@@ -32,4 +32,5 @@ add_executable(Machine_Learning main.cpp
         Softmax.cpp
         SparseCategoricalCrossentropy.h
         Model.cpp
+        Optimiser.cpp
 )

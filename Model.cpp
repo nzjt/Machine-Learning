@@ -46,7 +46,7 @@ void Model::write(ofstream &file) const {
     return activations;
 }
 
-void Model::computeDerivatives(const vector<double> &x, const vector<double> &y, Derivatives &accumulator) {
+void Model::computeDerivatives(const vector<double> &x, const vector<double> &y, Derivatives &accumulator) const {
     struct Cache {
         vector<double> z, a;
     };
@@ -76,7 +76,7 @@ void Model::computeDerivatives(const vector<double> &x, const vector<double> &y,
     }
 }
 
-Derivatives Model::computeDerivatives(int m, const vector<vector<double>> &x, const vector<vector<double>> &y, const vector<bool> &doSample) {
+Derivatives Model::computeDerivatives(int m, const vector<vector<double>> &x, const vector<vector<double>> &y, const vector<bool> &doSample) const {
     int M = x.size(), K = layers.size();
     Derivatives ret;
     ret.dJ_dw.resize(K);
@@ -108,23 +108,4 @@ Derivatives Model::computeDerivatives(int m, const vector<vector<double>> &x, co
     ret.dJ_dw /= m;
     ret.dJ_db /= m;
     return ret;
-}
-
-void Model::fit(const vector<vector<double>> &x, const vector<vector<double>> &y, int epochs, Optimiser &optimiser, MyRandom &rng, double sample = 1) {
-    int M = x.size();
-    for (int t = epochs; t--;) {
-        cerr << t << endl;
-        vector<bool> doSample(M);
-        int m = 0;
-        for (int i = 0; i < M; ++i) {
-            if (rng(0, 1) <= sample) {
-                doSample[i] = true;
-                ++m;
-            }
-        }
-        optimiser.optimise(computeDerivatives(m, x, y, doSample), layers);
-        if (t % 500 == 0) {
-            cerr << loss(x, y) << endl;
-        }
-    }
 }

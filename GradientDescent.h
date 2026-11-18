@@ -8,7 +8,7 @@ struct GradientDescent : Optimiser {
 
     GradientDescent(double learningRate) : learningRate(learningRate) {}
 
-    void optimise(const Derivatives &derivatives, vector<Dense*> &layers) override;
+    void step(Model &model, const std::function<Derivatives(const Model&)> &computeDerivatives) override;
 };
 
 #endif //MACHINE_LEARNING_GRADIENTDESCENT_H

@@ -2,7 +2,6 @@
 #define MACHINE_LEARNING_MODEL_H
 #include "Dense.h"
 #include "LossFunction.h"
-#include "Optimiser.h"
 #include <bits/extc++.h>
 
 using namespace std;
@@ -53,11 +52,9 @@ struct Model {
         return loss + L2 * regularisation / x.size() / 2;
     }
 
-    void computeDerivatives(const vector<double> &x, const vector<double> &y, Derivatives &accumulator);
+    void computeDerivatives(const vector<double> &x, const vector<double> &y, Derivatives &accumulator) const;
 
-    Derivatives computeDerivatives(int m, const vector<vector<double>> &x, const vector<vector<double>> &y, const vector<bool> &doSample);
-
-    void fit(const vector<vector<double>> &x, const vector<vector<double>> &y, int epochs, Optimiser &optimiser, MyRandom &rng, double sample = 1);
+    Derivatives computeDerivatives(int m, const vector<vector<double>> &x, const vector<vector<double>> &y, const vector<bool> &doSample) const;
 };
 
 #endif //MACHINE_LEARNING_MODEL_H
