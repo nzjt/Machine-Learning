@@ -16,3 +16,14 @@ std::vector<double> LeakyReLU::gradient(const std::vector<double> &dJ_da, const 
     }
     return ret;
 }
+
+void LeakyReLU::initialise(std::vector<std::vector<double> > &w, std::vector<double> &b, MyRandom &rng) const {
+    int m = w[0].size();
+    double stddev = 2. / m;
+    for (auto &row: w) {
+        for (auto &wi: row) {
+            wi = rng.normal(0, stddev);
+        }
+    }
+    b.assign(b.size(), 0.01);
+}

@@ -11,6 +11,10 @@ struct MyRandom {
     double operator()(double l, double r) {
         return std::uniform_real_distribution<>(l, r)(rng);
     }
+
+    double normal(double mean, double stddev) {
+        return std::normal_distribution<>(mean, stddev)(rng);
+    }
 };
 
 #endif //MACHINE_LEARNING_MYRANDOM_H

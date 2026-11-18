@@ -11,6 +11,9 @@ struct Linear : ActivationFunction {
     using ActivationFunction::gradient;
 
     [[nodiscard]] std::vector<double> gradient(const std::vector<double> &dJ_da, const std::vector<double> &z, const std::vector<double> &a) const override;
+
+    void initialise(std::vector<std::vector<double>> &w, std::vector<double> &b, MyRandom &rng) const override;
+
 };
 
 #endif //MACHINE_LEARNING_LINEAR_H

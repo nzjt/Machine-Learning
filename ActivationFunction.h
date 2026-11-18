@@ -1,5 +1,6 @@
 #ifndef MACHINE_LEARNING_ACTIVATIONFUNCTION_H
 #define MACHINE_LEARNING_ACTIVATIONFUNCTION_H
+#include "MyRandom.h"
 #include <bits/stdc++.h>
 
 struct ActivationFunction {
@@ -24,6 +25,8 @@ struct ActivationFunction {
         }
         return ret;
     }
+
+    virtual void initialise(std::vector<std::vector<double>> &w, std::vector<double> &b, MyRandom &rng) const = 0;
 
     virtual ~ActivationFunction() = default;
 };

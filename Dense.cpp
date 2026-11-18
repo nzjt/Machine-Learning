@@ -6,14 +6,7 @@
 Dense::Dense(int n, ActivationFunction *activationFunction) : Layer(n), b(n), activationFunction(activationFunction) {}
 
 void Dense::randomise(MyRandom &rng) {
-    for (auto &row: w) {
-        for (auto &wi: row) {
-            wi = rng(-0.1, 0.1);
-        }
-    }
-    for (auto &bi: b) {
-        bi = rng(-0.05, 0.05);
-    }
+    activationFunction->initialise(w, b, rng);
 }
 
 void Dense::read(ifstream &file) {
