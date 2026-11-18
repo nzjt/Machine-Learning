@@ -37,4 +37,6 @@ add_executable(Machine_Learning main.cpp
         Momentum.h
         Nesterov.cpp
         Nesterov.h
+        RMSProp.cpp
+        RMSProp.h
 )

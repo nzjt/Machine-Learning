@@ -79,6 +79,19 @@ std::vector<T> operator-(const T &a, std::vector<T> b) {
     return b;
 }
 
+template <class T>
+std::vector<T> operator/=(std::vector<T> &a, const std::vector<T> &b) {
+    for (int i = 0; i < a.size(); ++i) {
+        a[i] /= b[i];
+    }
+    return a;
+}
+
+template <class T>
+std::vector<T> operator/(std::vector<T> a, const std::vector<T> &b) {
+    return a /= b;
+}
+
 template <class T, class U>
 std::vector<T> operator/=(std::vector<T> &a, const U &b) {
     for (auto &ai: a) ai /= b;
@@ -117,6 +130,14 @@ std::vector<T> exp(const std::vector<T> &x) {
         ret.push_back(exp(xi));
     }
     return ret;
+}
+
+template <class T>
+std::vector<T> sqrt(std::vector<T> a) {
+    for (auto &ai: a) {
+        ai = sqrt(ai);
+    }
+    return a;
 }
 
 #endif //MACHINE_LEARNING_LINALG_H
