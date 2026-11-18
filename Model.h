@@ -9,6 +9,26 @@ using namespace std;
 struct Derivatives {
     vector<vector<vector<double>>> dJ_dw;
     vector<vector<double>> dJ_db;
+
+    Derivatives operator+=(const Derivatives &other) {
+        dJ_dw += other.dJ_dw;
+        dJ_db += other.dJ_db;
+        return *this;
+    }
+
+    Derivatives operator+(const Derivatives &other) const {
+        return {dJ_dw + other.dJ_dw, other.dJ_db};
+    }
+
+    Derivatives operator*=(double x) {
+        dJ_dw *= x;
+        dJ_db *= x;
+        return *this;
+    }
+
+    Derivatives operator*(double x) const {
+        return {dJ_dw * x, dJ_db * x};
+    }
 };
 
 struct Model {

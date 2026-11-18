@@ -33,4 +33,6 @@ add_executable(Machine_Learning main.cpp
         SparseCategoricalCrossentropy.h
         Model.cpp
         Optimiser.cpp
+        Momentum.cpp
+        Momentum.h
 )
