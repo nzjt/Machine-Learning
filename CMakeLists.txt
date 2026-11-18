@@ -35,4 +35,6 @@ add_executable(Machine_Learning main.cpp
         Optimiser.cpp
         Momentum.cpp
         Momentum.h
+        Nesterov.cpp
+        Nesterov.h
 )
